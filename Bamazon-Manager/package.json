@@ -1,0 +1,16 @@
+{
+  "name": "bamazon-manager",
+  "version": "1.0.0",
+  "description": "manager part of the Bamazon app",
+  "main": "bamazonManager.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "mySQL",
+    "NODE",
+    "JS"
+  ],
+  "author": "RPB",
+  "license": "MIT"
+}

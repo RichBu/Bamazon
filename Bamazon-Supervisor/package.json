@@ -1,0 +1,16 @@
+{
+  "name": "bamazon-supervisor",
+  "version": "1.0.0",
+  "description": "supervisor portion of the bamazon app",
+  "main": "bamazonSupervisor.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "mySQL",
+    "Node",
+    "JS"
+  ],
+  "author": "RPB",
+  "license": "MIT"
+}
