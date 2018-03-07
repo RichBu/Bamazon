@@ -12,5 +12,10 @@
     "JS"
   ],
   "author": "RPB",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "cli-table": "^0.3.1",
+    "inquirer": "^5.1.0",
+    "mysql": "^2.15.0"
+  }
 }
