@@ -2,16 +2,13 @@
 //Bamazon Manager file
 
 //bamazonManager.js
+
 var mySQL = require('mysql');
 var inquirer = require("inquirer");
 var Table = require('cli-table');
 var numeral = require('numeral');
 
-var cmdParam = "";
 
-
-
-//var numeral = new Numeral();
 
 //variable for connection
 var sqlConnection = mySQL.createConnection({
@@ -108,20 +105,6 @@ var quantityInStock = function (_itemId) {
 
 };
 
-//db_update ( item_id, new qty )
-//takes in an item_id and then updates the qty
-
-// function checkQty( item_id, qtyCheck )
-//  check if there is enough qty to subtract
-//  return true if so, false if not
-
-//function fullFillOrder( item_id, qtyCheck )
-// call checkQty
-// 
-
-//function buy
-//  -- what ID
-//  -- how many
 
 var userSelectObj = {
     //global variable to hold what the user picked
@@ -131,6 +114,7 @@ var userSelectObj = {
     department_name: "",
     price: 0.0,
     qty_in_stock: 0,
+    qty_low_level: 0,
     qty_to_buy: 0,
     qty_after_buy: 0,
     order_total: 0
@@ -146,14 +130,28 @@ var dispError = function (msgStr) {
 };
 
 
-var dispOrder = function () {
+var dispInventoryAdd = function () {
     console.log("");
     console.log("--------- added to inventory -----------");
     console.log(userSelectObj.item_id + "  " + userSelectObj.product_name);
     console.log("Quantities:");
-    console.log("before addition: " + numeral(userSelectObj.qty_in_stock).format("0,000") );
-    console.log("quantity added : " + numeral(userSelectObj.qty_to_buy).format("0,000") );
-    console.log("after addition : " + numeral(userSelectObj.qty_after_buy).format("0,000") );
+    console.log("before addition: " + numeral(userSelectObj.qty_in_stock).format("0,000"));
+    console.log("quantity added : " + numeral(userSelectObj.qty_to_buy).format("0,000"));
+    console.log("after addition : " + numeral(userSelectObj.qty_after_buy).format("0,000"));
+    console.log("----------------------------------------");
+    console.log("\n\n");
+};
+
+
+var dispInventoryAppend = function () {
+    console.log("");
+    console.log("--- new item appended to inventory------");
+    console.log("Item ID           : " + userSelectObj.item_id  );
+    console.log("Product name      : " + userSelectObj.product_name);
+    console.log("Department        : " + userSelectObj.department_name);
+    console.log("Quantity in stock : " + numeral(userSelectObj.qty_in_stock).format("0,000") );
+    console.log("Low stock level   : " + numeral(userSelectObj.qty_low_level).format("0,000") );
+    console.log("Price             : " + numeral(userSelectObj.price).format("$0,000.00") );
     console.log("----------------------------------------");
     console.log("\n\n");
 };
@@ -192,12 +190,12 @@ function managerMenu() {
                 addInventory();
                 break;
             case "Add New Product":
+                newInventoryItem();
                 break;
             case "Quit":
                 return sqlConnection.end();
                 break;
         };
-        //evalCommand(cmdReadIn, cmdParam);
     });
 };
 
@@ -235,7 +233,6 @@ function addInventory() {
                     }
                 ]).then(function (answers) {
                     userSelectObj.qty_to_buy = parseInt(answers.quantity);
-
                     userSelectObj.qty_after_buy = userSelectObj.qty_in_stock + userSelectObj.qty_to_buy;
                     //so the quantity is correct update the database
                     sqlConnection.query(
@@ -250,7 +247,7 @@ function addInventory() {
                         ],
                         function (error) {
                             if (error) throw error;
-                            dispOrder();
+                            dispInventoryAdd();
                             return start();
                         }
                     );
@@ -262,18 +259,18 @@ function addInventory() {
 
 
 
-function userPrompt() {
+
+function newInventoryItem() {
     inquirer.prompt([
         {
-            name: "item_to_buy",
-            message: "Item to buy (quit to end): "
+            name: "item_to_append",
+            message: "Item ID of new item (quit to end): "
         }
     ]).then(function (answers) {
         //what the user picked  
-        userSelectObj.item_id = answers.item_to_buy.trim().toUpperCase();
+        userSelectObj.item_id = answers.item_to_append.trim().toUpperCase();
         if (userSelectObj.item_id === "QUIT") {
-            sqlConnection.end();
-            return;
+            return start();
         };
         sqlConnection.query("SELECT * FROM bamazon_db.products WHERE ?",
             [{
@@ -281,52 +278,64 @@ function userPrompt() {
             }],
             function (error, data) {
                 //check if there were any hits
-                if (data.length <= 0) {
-                    dispError("bad item.  choose again");
+                //when adding a new item, it's bad if it exists already
+                if (data.length > 0) {
+                    dispError("item id already exisits. use Add to Inventory to change quantity");
                     return start();
                 };
-                //there was a find, check if there is enough qty
-                storeDBtoObj(data);
-
+                //there was no find, so continue
                 //now ask for the quantity
                 inquirer.prompt([
                     {
+                        name: "product",
+                        message: "Product: "
+                    },
+                    {
+                        name: "department",
+                        message: "Department: "
+                    },
+                    {
+                        name: "price",
+                        message: "Price: "
+                    },
+                    {
                         name: "quantity",
-                        message: "How many to buy: "
+                        message: "How much quantity to start with: "
+                    },
+                    {
+                        name: "qty_low_level",
+                        message: "Low stock level qty: "
                     }
                 ]).then(function (answers) {
-                    userSelectObj.qty_to_buy = parseInt(answers.quantity);
+                    userSelectObj.product_name = answers.product;
+                    userSelectObj.department_name = answers.department.toUpperCase();
+                    userSelectObj.price = answers.price;
+                    userSelectObj.qty_in_stock = parseInt(answers.quantity);
+                    userSelectObj.qty_low_level = parseInt(answers.qty_low_level);
+                    //so the quantity is correct update the database
 
-                    userSelectObj.qty_after_buy = userSelectObj.qty_in_stock - userSelectObj.qty_to_buy;
-                    if (userSelectObj.qty_after_buy < 0) {
-                        var msgStr = "Sorry, we are out of stock for your full order. \n";
-                        msgStr += "You are ordering " + userSelectObj.qty_to_buy + " items of " + userSelectObj.product_name + "\n";
-                        msgStr += "and we only have " + userSelectObj.qty_in_stock + ".";
-                        dispError(msgStr);
-                        return start();
-                    } else {
-                        //so the quantity is correct update the database
-                        sqlConnection.query(
-                            "UPDATE products SET ? WHERE ?",
-                            [
-                                {
-                                    stock_quantity: userSelectObj.qty_after_buy
-                                },
-                                {
-                                    item_id: userSelectObj.item_id
-                                }
-                            ],
-                            function (error) {
-                                if (error) throw error;
-                                dispOrder();
-                                return start();
-                            }
-                        );
-                    };
+                    sqlConnection.query(
+                        "INSERT INTO products SET ?",
+                        {
+                            item_id: userSelectObj.item_id,
+                            product_name: userSelectObj.product_name,
+                            department_name: userSelectObj.department_name,
+                            price: userSelectObj.price,
+                            stock_quantity: userSelectObj.qty_in_stock,
+                            low_quantity_level: userSelectObj.qty_low_level
+                        }
+                        ,
+                        function (error) {
+                            if (error) throw error;
+                            dispInventoryAppend();
+                            return start();
+                        }
+                    );
                 }); // quantity input
             }); //part number input
     });
 };
+
 
 
 
