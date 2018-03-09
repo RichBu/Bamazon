@@ -112,11 +112,11 @@ var dispError = function (msgStr) {
 var dispOrder = function () {
     console.log("");
     console.log("---------your order -----------");
-    console.log(userSelectObj.item_id + "  " + userSelectObj.product_name );
+    console.log(userSelectObj.item_id + "  " + userSelectObj.product_name);
     var priceFormatted = numeral(userSelectObj.price).format("$000,000.00");
     userSelectObj.order_total = userSelectObj.price * userSelectObj.qty_to_buy;
-    var totalFormatted = numeral( userSelectObj.order_total ).format("$0000,000.00");
-    console.log("unit price = " + priceFormatted + " x " + userSelectObj.qty_to_buy + " units = " + totalFormatted + " total" );
+    var totalFormatted = numeral(userSelectObj.order_total).format("$0000,000.00");
+    console.log("unit price = " + priceFormatted + " x " + userSelectObj.qty_to_buy + " units = " + totalFormatted + " total");
     console.log("------------------------------");
     console.log("\nIs shipping. thank-you\n\n");
 };
@@ -136,20 +136,14 @@ function userPrompt() {
         {
             name: "item_to_buy",
             message: "Item to buy (quit to end): "
-        }, {
-            name: "quantity",
-            message: "How many to buy: "
         }
     ]).then(function (answers) {
         //what the user picked  
-console.log("user selected");        
         userSelectObj.item_id = answers.item_to_buy.trim().toUpperCase();
-        userSelectObj.qty_to_buy = parseInt(answers.quantity);
         if (userSelectObj.item_id === "QUIT") {
             sqlConnection.end();
             return;
         };
-console.log("searching");
         sqlConnection.query("SELECT * FROM bamazon_db.products WHERE ?",
             [{
                 item_id: userSelectObj.item_id
@@ -162,8 +156,18 @@ console.log("searching");
                 };
                 //there was a find, check if there is enough qty
                 storeDBtoObj(data);
+
+                //now ask for the quantity
+                inquirer.prompt([
+                    {
+                        name: "quantity",
+                        message: "How many to buy: "
+                    }
+                ]).then(function (answers) {
+                userSelectObj.qty_to_buy = parseInt(answers.quantity);
+
+
                 userSelectObj.qty_after_buy = userSelectObj.qty_in_stock - userSelectObj.qty_to_buy;
-console.log(userSelectObj);                
                 if (userSelectObj.qty_after_buy < 0) {
                     var msgStr = "Sorry, we are out of stock for your full order. \n";
                     msgStr += "You are ordering " + userSelectObj.qty_to_buy + " items of " + userSelectObj.product_name + "\n";
@@ -189,7 +193,8 @@ console.log(userSelectObj);
                         }
                     );
                 };
-            });
+            }); // quantity input
+            }); //part number input
     });
 };
 
