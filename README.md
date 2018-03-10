@@ -58,6 +58,7 @@ are printed and the user can see total dollars in sales.
 
 
 Demonstration Videos
+
 Customer module:
 [![Bamazon Customer](https://img.youtube.com/vi/PGltPMZavqU/0.jpg)](https://www.youtube.com/watch?v=PGltPMZavqU)
 
@@ -74,6 +75,7 @@ Technolgies used:
 3. Inquirer for menus
 4. mySQL for the database
 5. Numeral for number formatting
+6. CLI-Table for displaying the table of data
 
 Internal design:
 All of the modules write to a SQL database located on the network, most likely on the same
@@ -89,6 +91,6 @@ writing.
 To do:
 1. Better UI
 2. Customer module to have a menu.
-
+3. Interface to an HTML page using handlebars ??
 
 
