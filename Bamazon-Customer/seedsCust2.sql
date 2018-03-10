@@ -11,13 +11,13 @@ INSERT INTO products (item_id, product_name, department_name, price, stock_quant
     "COMP-003", "Laptop computer-Chromebook", "COMPUTERS",  "178.56", "24", "5" );
 
 INSERT INTO products (item_id, product_name, department_name, price, stock_quantity, low_quantity_level ) VALUES (
-    "ACCE-001", "Case-computer-shoulder", "ACCESSORIES",  "34.90", "9", "5" );
+    "ACCE-001", "Case-computer-shoulder", "ACCESSORIES",  "34.90", "1", "5" );
 
 INSERT INTO products (item_id, product_name, department_name, price, stock_quantity, low_quantity_level ) VALUES (
     "ACCE-002", "Case-computer-sleeve", "ACCESSORIES",  "12.43", "50", "5" );
 
 INSERT INTO products (item_id, product_name, department_name, price, stock_quantity, low_quantity_level ) VALUES (
-    "PART-001", "Power Supply-Apple-45W", "PARTS",  "62.51", "10", "5" );
+    "PART-001", "Power Supply-Apple-45W", "PARTS",  "62.51", "3", "5" );
 
 INSERT INTO products (item_id, product_name, department_name, price, stock_quantity, low_quantity_level ) VALUES (
     "PART-002", "Pen-Microsoft", "PARTS",  "41.20", "8", "5" );

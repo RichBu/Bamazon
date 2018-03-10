@@ -71,20 +71,6 @@ var quantityInStock = function (_itemId) {
 
 };
 
-//db_update ( item_id, new qty )
-//takes in an item_id and then updates the qty
-
-// function checkQty( item_id, qtyCheck )
-//  check if there is enough qty to subtract
-//  return true if so, false if not
-
-//function fullFillOrder( item_id, qtyCheck )
-// call checkQty
-// 
-
-//function buy
-//  -- what ID
-//  -- how many
 
 var userSelectObj = {
     //global variable to hold what the user picked
@@ -96,7 +82,8 @@ var userSelectObj = {
     qty_in_stock: 0,
     qty_to_buy: 0,
     qty_after_buy: 0,
-    order_total: 0
+    order_total: 0,
+    product_sales: 0,
 };
 
 
@@ -114,7 +101,6 @@ var dispOrder = function () {
     console.log("---------your order -----------");
     console.log(userSelectObj.item_id + "  " + userSelectObj.product_name);
     var priceFormatted = numeral(userSelectObj.price).format("$000,000.00");
-    userSelectObj.order_total = userSelectObj.price * userSelectObj.qty_to_buy;
     var totalFormatted = numeral(userSelectObj.order_total).format("$0000,000.00");
     console.log("unit price = " + priceFormatted + " x " + userSelectObj.qty_to_buy + " units = " + totalFormatted + " total");
     console.log("------------------------------");
@@ -128,6 +114,7 @@ var storeDBtoObj = function (_data) {
     userSelectObj.department_name = _data[0].department_name;
     userSelectObj.qty_in_stock = _data[0].stock_quantity;
     userSelectObj.price = _data[0].price;
+    userSelectObj.product_sales = _data[0].product_sales
 };
 
 
@@ -164,36 +151,37 @@ function userPrompt() {
                         message: "How many to buy: "
                     }
                 ]).then(function (answers) {
-                userSelectObj.qty_to_buy = parseInt(answers.quantity);
+                    userSelectObj.qty_to_buy = parseInt(answers.quantity);
+                    userSelectObj.qty_after_buy = userSelectObj.qty_in_stock - userSelectObj.qty_to_buy;
+                    userSelectObj.order_total = userSelectObj.price * userSelectObj.qty_to_buy;
 
-
-                userSelectObj.qty_after_buy = userSelectObj.qty_in_stock - userSelectObj.qty_to_buy;
-                if (userSelectObj.qty_after_buy < 0) {
-                    var msgStr = "Sorry, we are out of stock for your full order. \n";
-                    msgStr += "You are ordering " + userSelectObj.qty_to_buy + " items of " + userSelectObj.product_name + "\n";
-                    msgStr += "and we only have " + userSelectObj.qty_in_stock + ".";
-                    dispError(msgStr);
-                    return start();
-                } else {
-                    //so the quantity is correct update the database
-                    sqlConnection.query(
-                        "UPDATE products SET ? WHERE ?",
-                        [
-                            {
-                                stock_quantity: userSelectObj.qty_after_buy
-                            },
-                            {
-                                item_id: userSelectObj.item_id
+                    if (userSelectObj.qty_after_buy < 0) {
+                        var msgStr = "Sorry, we are out of stock for your full order. \n";
+                        msgStr += "You are ordering " + userSelectObj.qty_to_buy + " items of " + userSelectObj.product_name + "\n";
+                        msgStr += "and we only have " + userSelectObj.qty_in_stock + ".";
+                        dispError(msgStr);
+                        return start();
+                    } else {
+                        //so the quantity is correct update the database
+                        sqlConnection.query(
+                            "UPDATE products SET ? WHERE ?",
+                            [
+                                {
+                                    stock_quantity: userSelectObj.qty_after_buy,
+                                    product_sales : userSelectObj.product_sales + userSelectObj.order_total
+                                },
+                                {
+                                    item_id: userSelectObj.item_id
+                                }
+                            ],
+                            function (error) {
+                                if (error) throw error;
+                                dispOrder();
+                                return start();
                             }
-                        ],
-                        function (error) {
-                            if (error) throw error;
-                            dispOrder();
-                            return start();
-                        }
-                    );
-                };
-            }); // quantity input
+                        );
+                    };
+                }); // quantity input
             }); //part number input
     });
 };
