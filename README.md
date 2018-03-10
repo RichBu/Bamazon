@@ -54,7 +54,7 @@ Printing the profitibility report shows how much profit the business has generat
 To find out which products are selling and to cross check the profitabiity report, the
 user can select the sales report.  Here every product along with it's cummaltive sales
 are printed and the user can see total dollars in sales.
-![Customer main menu](/assets/images/screen_caps/Supv_sales.png)
+![Customer main menu](/assets/images/screen_caps/Supv_Sales.png)
 
 
 Demonstration Videos
