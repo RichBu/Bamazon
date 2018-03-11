@@ -61,51 +61,6 @@ var dispProducts_found = function (error, data) {
 };
 
 
-//function display products low on inventory
-var dispLowStockLevels_start = function () {
-    //no input, just blast out the files
-    console.log("\nParts at low levels");
-    sqlConnection.query("SELECT * FROM bamazon_db.products WHERE (stock_quantity<low_quantity_level)", function (error, data) {
-        dispProducts_found(error, data);
-    });
-};
-
-
-//products were found by the query
-var dispLowStockLevels_found = function (error, data) {
-    //first check if there was an error
-    var table = new Table({
-        head: ["Item", "Product name", "Department", "Price"],
-        colWidths: [15, 42, 20, 15]
-    });
-    if (error) throw error;
-    var endVal = data.length;
-    for (var i = 0; i < endVal; i++) {
-        var priceFormatted = numeral(data[i].price).format("$000,000.00");
-        table.push([data[i].item_id, data[i].product_name, data[i].department_name, priceFormatted]);
-    };
-    console.log(table.toString());
-    console.log("\n");
-    start();
-};
-
-
-//searches for item_id in the db and return true
-var validItemNum = function (_itemId) {
-    sqlConnection.query("SELECT * FROM bamazon_db.products", function (error, data) {
-        dispAllProducts_found(error, data);
-    });
-
-};
-
-
-//function to return the quantity of an item
-//will return quantity in stock
-var quantityInStock = function (_itemId) {
-
-};
-
-
 var userSelectObj = {
     //global variable to hold what the user picked
     //allows all of the callbacks to reach these values
@@ -154,6 +109,35 @@ var dispInventoryAppend = function () {
     console.log("Price             : " + numeral(userSelectObj.price).format("$0,000.00") );
     console.log("----------------------------------------");
     console.log("\n\n");
+};
+
+
+//function display products low on inventory
+var dispLowStockLevels_start = function () {
+    //no input, just blast out the files
+    console.log("\nParts at low levels");
+    sqlConnection.query("SELECT * FROM bamazon_db.products WHERE (stock_quantity<low_quantity_level)", function (error, data) {
+        dispProducts_found(error, data);
+    });
+};
+
+
+//products were found by the query
+var dispLowStockLevels_found = function (error, data) {
+    //first check if there was an error
+    var table = new Table({
+        head: ["Item", "Product name", "Department", "Price"],
+        colWidths: [15, 42, 20, 15]
+    });
+    if (error) throw error;
+    var endVal = data.length;
+    for (var i = 0; i < endVal; i++) {
+        var priceFormatted = numeral(data[i].price).format("$000,000.00");
+        table.push([data[i].item_id, data[i].product_name, data[i].department_name, priceFormatted]);
+    };
+    console.log(table.toString());
+    console.log("\n");
+    start();
 };
 
 

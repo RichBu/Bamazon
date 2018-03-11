@@ -106,7 +106,8 @@ var userSelectObj = {
     qty_low_level: 0,
     qty_to_buy: 0,
     qty_after_buy: 0,
-    order_total: 0
+    order_total: 0,
+    product_sales: 0
 };
 
 
