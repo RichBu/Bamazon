@@ -9,6 +9,8 @@ var mySQL = require('mysql');
 var inquirer = require("inquirer");
 var Table = require('cli-table');
 var numeral = require('numeral');
+var moment = require('moment');
+
 
 
 
@@ -111,6 +113,24 @@ var userSelectObj = {
 };
 
 
+var auditRecObj = {
+    //global record for the audit file
+    //put all items in here before writing.
+    //makes it easier to debug
+    audit_date: 0,
+    audit_type: "",
+    item_id: "",
+    product_name: "",
+    department_name: "",
+    price: 0.0,
+    qty_to_buy: 0,
+    stock_quantity: 0,
+    low_quantity_level: 0,
+    product_sales: 0.00,
+    over_head_costs: 0.00
+};
+
+
 var dispError = function (msgStr) {
     console.log("");
     console.log("------ ERROR -----------------");
@@ -126,6 +146,82 @@ var storeDBtoObj = function (_data) {
     userSelectObj.department_name = _data[0].department_name;
     userSelectObj.qty_in_stock = _data[0].stock_quantity;
     userSelectObj.price = _data[0].price;
+    userSelectObj.product_sales = _data[0].product_sales,
+    userSelectObj.qty_low_level = _data[0].low_quantity_level
+};
+
+
+
+
+//function display products low on inventory
+var dispAudits_start = function () {
+    //no input, just blast out the files
+    console.log("\nListing of Audit File");
+    sqlConnection.query("SELECT * FROM bamazon_db.audits", function (error, data) {
+        dispAudits_found(error, data);
+    });
+};
+
+
+//products were found by the query
+var dispAudits_found = function (error, data) {
+    //first check if there was an error
+    var table = new Table({
+        head: ["Audit Date", "Audit Type", "Item", "Product name", "Department", "Price", "Qty Ord", "Stk Qty", "Low Lvl", "Prod Sales", "Overhead" ],
+        colWidths: [19, 12, 15, 42, 20, 15, 10, 10, 10, 12, 12]
+    });
+    if (error) throw error;
+    var endVal = data.length;
+    for (var i = 0; i < endVal; i++) {
+        var auditDate = moment.unix(data[i].audit_date).format("MM-DD-YYYY HH:mm");
+        var priceFormatted = numeral(data[i].price).format("$000,000.00");
+        if ( data[i].stock_quantity == null) {data[i].stock_quantity=0; }
+        table.push([auditDate, data[i].audit_type, data[i].item_id, data[i].product_name, data[i].department_name, priceFormatted, data[i].qty_to_buy, data[i].stock_quantity, data[i].low_quantity_level, data[i].product_sales, data[i].over_head_costs ]);
+    };
+    console.log(table.toString());
+    console.log("\n");
+    supervisorMenu();
+};
+
+
+var writeAuditRec = function (auditType) {
+    //writes the audit record
+    //it is async so other writes and updates could be
+    //happening.  maybe have interlock ??
+    var currDate = moment().unix();
+    auditRecObj.audit_date = currDate;
+    auditRecObj.audit_type = auditType; //incoming
+    auditRecObj.item_id = userSelectObj.item_id;
+    auditRecObj.product_name = userSelectObj.product_name;
+    auditRecObj.department_name = userSelectObj.department_name;
+    auditRecObj.price = userSelectObj.price;
+    auditRecObj.qty_to_buy = userSelectObj.qty_to_buy;
+    auditRecObj.stock_quantity = userSelectObj.qty_in_stock;
+    auditRecObj.low_quantity_level = userSelectObj.qty_low_level;
+    auditRecObj.product_sales = userSelectObj.product_sales + userSelectObj.order_total;
+    auditRecObj.over_head_costs = userSelectObj.over_head_costs;
+
+    sqlConnection.query(
+        "INSERT INTO audits SET ?",
+        {
+            audit_date: auditRecObj.audit_date,
+            audit_type: auditRecObj.audit_type,
+            item_id: auditRecObj.item_id,
+            product_name: auditRecObj.product_name,
+            department_name: auditRecObj.department_name,
+            price: auditRecObj.price,
+            qty_to_buy: auditRecObj.qty_to_buy,
+            stock_quantity: auditRecObj.stock_quantity,
+            low_quantity_level: auditRecObj.low_quantity_level,
+            product_sales: auditRecObj.product_sales,
+            over_head_costs: auditRecObj.over_head_costs
+        }
+        ,
+        function (error) {
+            if (error) throw error;
+            //wrote the audit record should it interlock ?
+            //should really
+        });
 };
 
 
@@ -160,6 +256,7 @@ function newDepartment() {
                     }
                 ]).then(function (answers) {
                     userSelectObj.over_head_costs = answers.overhead;
+                    writeAuditRec("NEW DEPT");
                     //add a new department
                     sqlConnection.query(
                         "INSERT INTO departments SET ?",
@@ -189,7 +286,7 @@ function supervisorMenu() {
         {
             type: "list",
             message: "What command do you want ?",
-            choices: ["View Profits by Dept", "View Product Sales", "Create New Department", "Quit"],
+            choices: ["View Profits by Dept", "View Product Sales", "Create New Department", "List Audit File","Quit"],
             name: "cmdList",
             pageSize: 10
         }
@@ -205,6 +302,9 @@ function supervisorMenu() {
                 break;
             case "Create New Department":
                 newDepartment();
+                break;
+            case "List Audit File":
+                dispAudits_start();
                 break;
             case "Quit":
                 return sqlConnection.end();

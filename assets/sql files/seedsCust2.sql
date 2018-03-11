@@ -32,8 +32,8 @@ INSERT INTO products (item_id, product_name, department_name, price, stock_quant
     "ACCE-005", "Drive-Hard-external 1TB USB", "ACCESSORIES",  "63.00", "32", "5" );
 
 
-INSERT INTO audits ( audit_date, audit_type, item_id, product_name, department_name, price, stock_quantity, low_quantity_level, product_sales, over_head_costs ) VALUES (
-    "1520705356", "INIT FILES", " ", "Initialize files with seed sql file", " ", "0.00", "0", "0", "0.00", "0.00" );
+INSERT INTO audits ( audit_date, audit_type, item_id, product_name, department_name, price, qty_to_buy, stock_quantity, low_quantity_level, product_sales, over_head_costs ) VALUES (
+    "1520705356", "INIT FILES", " ", "Initialize files with seed sql file", " ", "0.00", "0", "0", "0", "0.00", "0.00" );
 
 
 INSERT INTO orders ( order_date, item_id, product_name, department_name, price, qty_to_buy ) VALUES ( "1520705356", "INIT", "Initialize file", " ", "0.00", "0" );

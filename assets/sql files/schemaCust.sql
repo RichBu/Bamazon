@@ -34,6 +34,7 @@ CREATE TABLE audits(
     product_name VARCHAR(40),
     department_name VARCHAR(20),
     price DECIMAL(10,2) DEFAULT 0,
+    qty_to_buy INTEGER,
     stock_quantity INTEGER,
     low_quantity_level INTEGER,
     product_sales DECIMAL(10,2) DEFAULT 0,

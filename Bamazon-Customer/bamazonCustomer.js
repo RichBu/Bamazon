@@ -83,6 +83,7 @@ var auditRecObj = {
     product_name: "",
     department_name: "",
     price: 0.0,
+    qty_to_buy: 0,
     stock_quantity: 0,
     low_quantity_level: 0,
     product_sales: 0.00,
@@ -117,7 +118,8 @@ var storeDBtoObj = function (_data) {
     userSelectObj.department_name = _data[0].department_name;
     userSelectObj.qty_in_stock = _data[0].stock_quantity;
     userSelectObj.price = _data[0].price;
-    userSelectObj.product_sales = _data[0].product_sales
+    userSelectObj.product_sales = _data[0].product_sales;
+    userSelectObj.qty_low_level = _data[0].low_quantity_level;
 };
 
 
@@ -158,14 +160,15 @@ var writeAuditRec = function (auditType) {
     //it is async so other writes and updates could be
     //happening.  maybe have interlock ??
     var currDate = moment().unix();
-    auditRecObj.audit_date = 1520705356;
+    auditRecObj.audit_date = currDate;
     auditRecObj.audit_type = auditType; //incoming
     auditRecObj.item_id = userSelectObj.item_id;
     auditRecObj.product_name = userSelectObj.product_name;
     auditRecObj.department_name = userSelectObj.department_name;
     auditRecObj.price = userSelectObj.price;
-    auditRecObj.stock_quantity = userSelectObj.stock_quantity;
-    auditRecObj.low_quantity_level = 0;
+    auditRecObj.qty_to_buy = userSelectObj.qty_to_buy;
+    auditRecObj.stock_quantity = userSelectObj.qty_in_stock;
+    auditRecObj.low_quantity_level = userSelectObj.qty_low_level;
     auditRecObj.product_sales = userSelectObj.product_sales + userSelectObj.order_total;
     auditRecObj.over_head_costs = 0.00;
 
@@ -178,6 +181,7 @@ var writeAuditRec = function (auditType) {
             product_name: auditRecObj.product_name,
             department_name: auditRecObj.department_name,
             price: auditRecObj.price,
+            qty_to_buy: auditRecObj.qty_to_buy,
             stock_quantity: auditRecObj.stock_quantity,
             low_quantity_level: auditRecObj.low_quantity_level,
             product_sales: auditRecObj.product_sales,

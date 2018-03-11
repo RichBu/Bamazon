@@ -72,7 +72,26 @@ var userSelectObj = {
     qty_low_level: 0,
     qty_to_buy: 0,
     qty_after_buy: 0,
-    order_total: 0
+    order_total: 0,
+    product_sales: 0
+};
+
+
+var auditRecObj = {
+    //global record for the audit file
+    //put all items in here before writing.
+    //makes it easier to debug
+    audit_date: 0,
+    audit_type: "",
+    item_id: "",
+    product_name: "",
+    department_name: "",
+    price: 0.0,
+    qty_to_buy: 0,
+    stock_quantity: 0,
+    low_quantity_level: 0,
+    product_sales: 0.00,
+    over_head_costs: 0.00
 };
 
 
@@ -147,6 +166,8 @@ var storeDBtoObj = function (_data) {
     userSelectObj.department_name = _data[0].department_name;
     userSelectObj.qty_in_stock = _data[0].stock_quantity;
     userSelectObj.price = _data[0].price;
+    userSelectObj.product_sales = _data[0].product_sales;
+    userSelectObj.qty_low_level = _data[0].low_quantity_level;
 };
 
 
@@ -184,6 +205,49 @@ function managerMenu() {
 };
 
 
+
+var writeAuditRec = function (auditType) {
+    //writes the audit record
+    //it is async so other writes and updates could be
+    //happening.  maybe have interlock ??
+    var currDate = moment().unix();
+    auditRecObj.audit_date = currDate;
+    auditRecObj.audit_type = auditType; //incoming
+    auditRecObj.item_id = userSelectObj.item_id;
+    auditRecObj.product_name = userSelectObj.product_name;
+    auditRecObj.department_name = userSelectObj.department_name;
+    auditRecObj.price = userSelectObj.price;
+    auditRecObj.qty_to_buy = userSelectObj.qty_to_buy;
+    auditRecObj.stock_quantity = userSelectObj.qty_in_stock;
+    auditRecObj.low_quantity_level = userSelectObj.qty_low_level;
+    auditRecObj.product_sales = userSelectObj.product_sales + userSelectObj.order_total;
+    auditRecObj.over_head_costs = 0.00;
+
+    sqlConnection.query(
+        "INSERT INTO audits SET ?",
+        {
+            audit_date: auditRecObj.audit_date,
+            audit_type: auditRecObj.audit_type,
+            item_id: auditRecObj.item_id,
+            product_name: auditRecObj.product_name,
+            department_name: auditRecObj.department_name,
+            price: auditRecObj.price,
+            qty_to_buy: auditRecObj.qty_to_buy,
+            stock_quantity: auditRecObj.stock_quantity,
+            low_quantity_level: auditRecObj.low_quantity_level,
+            product_sales: auditRecObj.product_sales,
+            over_head_costs: auditRecObj.over_head_costs
+        }
+        ,
+        function (error) {
+            if (error) throw error;
+            //wrote the audit record should it interlock ?
+            //should really
+        });
+};
+
+
+
 function addInventory() {
     inquirer.prompt([
         {
@@ -218,6 +282,7 @@ function addInventory() {
                 ]).then(function (answers) {
                     userSelectObj.qty_to_buy = parseInt(answers.quantity);
                     userSelectObj.qty_after_buy = userSelectObj.qty_in_stock + userSelectObj.qty_to_buy;
+                    writeAuditRec("CHG QTY");
                     //so the quantity is correct update the database
                     sqlConnection.query(
                         "UPDATE products SET ? WHERE ?",
@@ -297,7 +362,7 @@ function newInventoryItem() {
                     userSelectObj.qty_in_stock = parseInt(answers.quantity);
                     userSelectObj.qty_low_level = parseInt(answers.qty_low_level);
                     //so the quantity is correct update the database
-
+                    writeAuditRec("ADD PROD" );
                     sqlConnection.query(
                         "INSERT INTO products SET ?",
                         {
