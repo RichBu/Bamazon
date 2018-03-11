@@ -144,7 +144,6 @@ var dispOrders_found = function (error, data) {
     var endVal = data.length;
     for (var i = 0; i < endVal; i++) {
         var ordDate = moment.unix(data[i].order_date).format("MM-DD-YYYY HH:mm");
-console.log(ordDate);
         var priceFormatted = numeral(data[i].price).format("$000,000.00");
         table.push([data[i].order_id, ordDate, data[i].item_id, data[i].product_name, data[i].department_name, priceFormatted, data[i].qty_to_buy]);
     };

@@ -7,6 +7,7 @@ var mySQL = require('mysql');
 var inquirer = require("inquirer");
 var Table = require('cli-table');
 var numeral = require('numeral');
+var moment = require('moment');
 
 
 
@@ -359,6 +360,7 @@ function newInventoryItem() {
                     userSelectObj.product_name = answers.product;
                     userSelectObj.department_name = answers.department.toUpperCase();
                     userSelectObj.price = answers.price;
+                    userSelectObj.qty_to_buy = parseInt(answers.quantity);
                     userSelectObj.qty_in_stock = parseInt(answers.quantity);
                     userSelectObj.qty_low_level = parseInt(answers.qty_low_level);
                     //so the quantity is correct update the database

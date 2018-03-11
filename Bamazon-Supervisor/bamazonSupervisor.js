@@ -87,6 +87,8 @@ var dispSales_found = function (error, data) {
     if (error) throw error;
     var endVal = data.length;  //last record is the total sum of all profits
     for (var i = 0; i < endVal; i++) {
+        if( data[i].sales == null) { data[i].sales = 0; }
+        if( data[i].prodName == null) { data[i].prodName = "";  }
         var salesFormatted = numeral(data[i].sales).format("$0,000.00");
         table.push([data[i].dept_id, data[i].dept, data[i].prodName, salesFormatted]);
     };
