@@ -101,13 +101,16 @@ Lastly, as in all good accounting / stock tracking programs, a full audit trail 
 Demonstration Videos
 
 Customer module:
-[![Bamazon Customer](https://img.youtube.com/vi/PGltPMZavqU/0.jpg)](https://www.youtube.com/watch?v=PGltPMZavqU)
+
+[![Bamazon Customer](https://img.youtube.com/vi/VQxFywMJGL8/0.jpg)](https://www.youtube.com/watch?v=VQxFywMJGL8)
 
 Manager module:
-[![Bamazon Manager](https://img.youtube.com/vi/jRyFefHEFbc/0.jpg)](https://www.youtube.com/watch?v=jRyFefHEFbc)
+
+[![Bamazon Manager](https://img.youtube.com/vi/5OqlmnW4h1s/0.jpg)](https://www.youtube.com/watch?v=5OqlmnW4h1s)
 
 Supervisor module:
-[![Supervisor Manager](https://img.youtube.com/vi/VIH1bufJwqg/0.jpg)](https://www.youtube.com/watch?v=VIH1bufJwqg)
+
+[![Supervisor Manager](https://img.youtube.com/vi/CJIWK7bGreE/0.jpg)](https://www.youtube.com/watch?v=CJIWK7bGreE)
 
 
 Technolgies used:
